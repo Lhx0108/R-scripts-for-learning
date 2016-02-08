@@ -1,5 +1,5 @@
 require(rjson)
-#'@author cDejong
+#'@author hLi
 #'@title matrix.from.garlic.scores
 #'@param directory of garlic input files
 #'@return matrix of scores for each cluster against the rest
@@ -98,10 +98,3 @@ add.score.matrix <- function(name, score, matrix){
   } 
   return(matrix)
 }
-
-
-
-
-
-
-
