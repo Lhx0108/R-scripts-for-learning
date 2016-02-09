@@ -102,8 +102,8 @@ add.score.matrix <- function(subject, score, garlic.matrix){
   #if not add it
   else{
     garlic.matrix <- cbind(garlic.matrix, rep(0, nrow(garlic.matrix)))
-    colnames(garlic.matrix)[-1] <- subject
-    garlic.matrix[-1,-1] = score
+    colnames(garlic.matrix)[-1][-1] <- subject
+    garlic.matrix[-1,-1] = score #galric.matrix[-1,-1] gives the last two columns somehow
   } 
   return(garlic.matrix)
 }
