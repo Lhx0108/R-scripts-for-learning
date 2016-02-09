@@ -11,8 +11,6 @@ scores1 <- get.relative.scores(garlic.results[[1]]) #matrix with scores and subj
 
 ##################MADE UP TEST
 #Scores
-mat <- add.scores.matrix(query.name, scores1, mat)
-
 
 #Test matrix made
 test.mat <- matrix(c(1,0.2,0.1,1), ncol =2)
