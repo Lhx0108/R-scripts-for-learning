@@ -44,7 +44,7 @@ get.name <- function(name){
 
 #gets the relative scores for each subject in the json object
 get.relative.scores <- function(garlic.results){
-  subject.scores <- lapply(garlic.results[[1]], function(garlic.result){
+  subject.scores <- lapply(garlic.results, function(garlic.result){
     subject <- get.name(garlic.result$subject)
     score <- garlic.result$scores$relative_score
     return(c(subject, score))
