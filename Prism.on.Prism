@@ -6,8 +6,8 @@ require(rjson)
 
 matrix.from.garlic.scores <- function(directory){
   list.of.files <- get.list.of.files(directory)
-  matrix <- get.matrix.from.files(list.of.files)
-  return(matrix)
+  garlic.matrix <- get.matrix.from.files(list.of.files)
+  return(garlic.matrix)
 }
 
 #takes a directory and returns list of all files
@@ -18,10 +18,22 @@ get.list.of.files <- function(directory){
 
 #Loop through the files and build a matrix
 get.matrix.from.files <- function(list.of.files){
-  matrix <- matrix()
+  garlic.matrix <- matrix()
   for(file in list.of.files){
-    matrix <- add.to.matrix(file, matrix)
+    garlic.matrix <- add.to.matrix(file, garlic.matrix)
   }
+}
+
+
+#adds all the results for a single file to the matrix
+#will add one row and 0-n columns
+add.to.matrix <- function(file1, matrix){
+  garlic.results <- fromJSON(file = file1)
+  query <- garlic.results[[1]][[1]]$query
+  query.name <- get.name(query)
+  scores <- get.relative.scores(garlic.results[[1]]) #matrix with scores and subject names
+  garlic.matrix <- add.scores.matrix(query.name, subject.scores, matrix)
+  return(garlic.matrix)
 }
 
 #gets the query name from a garlic.json object
@@ -31,18 +43,6 @@ get.name <- function(name){
   name <- paste(base.name, cluster.start, sep = "_")
   return(name)
 }
-
-#adds all the results for a single file to the matrix
-#will add one row and 0-n columns
-add.to.matrix <- function(file1, matrix){
-  garlic.results <- fromJSON(file = file1)
-  query <- garlic.results[[1]][[1]]$query
-  query.name <- get.name(query)
-  scores <- get.relative.scores(garlic.results[[1]]) #matrix with scores and subject names
-  matrix <- add.scores.matrix(query.name, subject.scores, matrix)
-  return(matrix)
-}
-
 
 
 #gets the relative scores for each subject in the json object
@@ -55,53 +55,55 @@ get.relative.scores <- function(garlic.results){
 }
 
 #add the relative score to matrix
-add.scores.matrix <- function(query.name, subject.scores, matrix){
+add.scores.matrix <- function(query.name, subject.scores, garlic.matrix){
   #add row for query
-  rownames(matrix) <- add.query.to.rows(query.name, matrix)
+  rownames(garlic.matrix) <- add.query.to.rows(query.name, garlic.matrix)
   for(i in 1:length(subject.scores)){
     subject.score <- subject.scores[[i]]
-    matrix <- add.score.matrix(subject.score[1], subject.score[2], matrix)
+    subject <- subject.score[1]
+    score <- subject.score[2]
+    garlic.matrix <- add.score.matrix(subjec, score, garlic.matrix)
   }
-  return(matrix)
+  return(garlic.matrix)
 }
 
-#add new query to each row and add max score to 
+#add query names to each new row and add max score to 
 #query to query cell
-add.query.to.rows <- function(query.name, matrix){
-  query.name[[1]] <- as.vector(matrix(0, rep(nrow(matrix))))
-  rbind(matrix, query.name[[1]])
+add.query.to.rows <- function(query.name, garlic.matrix){
+  if(is.na(garlic.matrix[1,1])){
+    garlic.matrix = matrix(1)
+    row.names(garlic.matrix)[1] <- query.name[1]
+    colnames(garlic.matrix)[1] <- query.name[1]
+  }else{
+    garlic.matrix <- rbind(garlic.matrix, rep(0,ncol(garlic.matrix)))
+    garlic.matrix <- cbind(garlic.matrix, rep(0,nrow(garlic.matrix)))
+    colnames(garlic.matrix)[-1] <- query.name[1]
+    row.names(garlic.matrix)[-1] <- query.names[1]
+    matirx[-1,-1] <- 1
+  }
   if(query.name[[1]] %in% colnames(matrix)){
-    a <- tail(row.names(matrix), n=1)
-    b <- colnames(matrix)[which(colnames(matrix) == tail(row.names(matrix), n=1))]
-    matrix[a, b] = 1
+    garlic.matrix[-1, ncol(garlic.matrix[which(colnames(garlic.matrix) == row.names(garlic.matrix[-1]))])] = 1
   }
   else{
-    query.name[[1]] <- as.vector(matrix(0, rep(nrow(matrix))))
-    cbind(matrix, query.name[[1]])
-    matrix[tail(row.names(matrix), n=1), tail(colnames(matrix), n=1)] = 1
+    garlic.matrix <- cbind(garlic.matrix, rep(0, nrow(garlic.matrix)))
+    colnames(garlic.matrix)[-1] <- query.name[1]
+    row.names(garlic.matrix)[-1] <- query.name[1]
+    garlic.matrix[-1, -1] = 1
   }
-  return(matrix)
+  return(garlic.matrix)
 }
 
-add.score.matrix <- function(name, score, matrix){
+add.score.matrix <- function(subject, score, garlic.matrix){
   #check if name exists as a colname, if so append to it
-  if(subject.score[1] %in% colnames(matrix)){
-    c <- colnames(matrix)[which(colnames(matrix) == subject.score[1])]
-    matrix[a, c] = subject.score[2]
+  if(subject %in% colnames(matrix)){
+    c <- ncol(garlic.matrix)[which(colnames(garlic.matrix) == subject)]
+    garlic.matrix[-1, c] = score
   }
   #if not add it
   else{
-    z <- as.vector(matrix(0, nrow = 1, ncol = length(nrow(matrix))))
-    colnames(z) <- subject.score[1]
-    cbind(matrix, z)
-    matrix[tail(row.names(matrix), n=1), tail(colnames(matrix), n=1)] = subject.score[2]
+    garlic.matrix <- cbind(garlic.matrix, rep(0, nrow(garlic.matrix)))
+    colnames(garlic.matrix)[-1] <- subject
+    garlic.matrix[-1,-1] = score
   } 
-  return(matrix)
+  return(garlic.matrix)
 }
-
-
-
-
-
-
-
