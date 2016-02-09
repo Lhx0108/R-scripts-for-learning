@@ -32,7 +32,7 @@ add.to.matrix <- function(file1, matrix){
   query <- garlic.results[[1]][[1]]$query
   query.name <- get.name(query)
   scores <- get.relative.scores(garlic.results[[1]]) #matrix with scores and subject names
-  garlic.matrix <- add.scores.matrix(query.name, subject.scores, matrix)
+  garlic.matrix <- add.scores.matrix(query.name, subject.scores, garlic.matrix)
   return(garlic.matrix)
 }
 
@@ -75,20 +75,18 @@ add.query.to.rows <- function(query.name, garlic.matrix){
     row.names(garlic.matrix)[1] <- query.name[1]
     colnames(garlic.matrix)[1] <- query.name[1]
   }else{
-    garlic.matrix <- rbind(garlic.matrix, rep(0,ncol(garlic.matrix)))
-    garlic.matrix <- cbind(garlic.matrix, rep(0,nrow(garlic.matrix)))
-    colnames(garlic.matrix)[-1] <- query.name[1]
-    row.names(garlic.matrix)[-1] <- query.names[1]
-    matirx[-1,-1] <- 1
+    rownames(garlic.matrix) <- add.query.to.rows.extention(query.name, garlic.matrix)
   }
-  if(query.name[[1]] %in% colnames(matrix)){
+}
+add.query.to.rows.extention <- function(query.name, garlic.matrix){
+    if(query.name[[1]] %in% colnames(matrix)){
     garlic.matrix[-1, ncol(garlic.matrix[which(colnames(garlic.matrix) == row.names(garlic.matrix[-1]))])] = 1
   }
   else{
     garlic.matrix <- cbind(garlic.matrix, rep(0, nrow(garlic.matrix)))
     colnames(garlic.matrix)[-1] <- query.name[1]
     row.names(garlic.matrix)[-1] <- query.name[1]
-    garlic.matrix[-1, -1] = 1
+    garlic.matrix[nrow(garlic.matrix), ncol(garlic.matrix)] = 1
   }
   return(garlic.matrix)
 }
@@ -103,7 +101,14 @@ add.score.matrix <- function(subject, score, garlic.matrix){
   else{
     garlic.matrix <- cbind(garlic.matrix, rep(0, nrow(garlic.matrix)))
     colnames(garlic.matrix)[-1][-1] <- subject
-    garlic.matrix[-1,-1] = score #galric.matrix[-1,-1] gives the last two columns somehow
+    garlic.matrix[-1,ncol(garlic.matrix)] = score
   } 
   return(garlic.matrix)
 }
+
+
+
+
+
+
+
