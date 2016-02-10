@@ -64,7 +64,6 @@ add.scores.matrix <- function(query.name, subject.scores, garlic.matrix){
     subject.score <- subject.scores[[i]]
     subject <- subject.score[1]
     score <- subject.score[2]
-    
     garlic.matrix <- add.score.matrix(subject, score, garlic.matrix)
   }
   return(garlic.matrix)
@@ -87,8 +86,7 @@ add.query.to.rows <- function(query.name, garlic.matrix){
 
 add.query.to.cols.extention <- function(query.name, garlic.matrix){
   if(query.name %in% colnames(garlic.matrix)){
-    garlic.matrix[nrow(garlic.matrix), garlic.matrix[which(colnames(garlic.matrix) == 
-                                                             row.names(garlic.matrix)[nrow(garlic.matrix)])]] <- 1
+    garlic.matrix[nrow(garlic.matrix), which(colnames(garlic.matrix) == row.names(garlic.matrix)[nrow(garlic.matrix)])] <- 1
   } else{
     garlic.matrix <- cbind(garlic.matrix, rep(0,nrow(garlic.matrix)))
     colnames(garlic.matrix)[ncol(garlic.matrix)] <- query.name
