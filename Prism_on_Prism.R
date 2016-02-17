@@ -8,6 +8,7 @@ matrix.from.garlic.scores <- function(directory){
   list.of.files <- get.list.of.files(directory)
   garlic.matrix <- get.matrix.from.files(list.of.files)
   return(garlic.matrix)
+  
 }
 
 #takes a directory and returns list of all files
@@ -19,12 +20,14 @@ get.list.of.files <- function(directory){
 #Loop through the files and build a matrix
 get.matrix.from.files <- function(list.of.files){
   garlic.matrix <- matrix()
+  counter <- 0
   for(file in list.of.files){
     garlic.matrix <- add.to.matrix(file, garlic.matrix)
+    counter <- counter + 1 
+    print(counter)
   }
   return(garlic.matrix)
 }
-
 
 #adds all the results for a single file to the matrix
 #will add one row and 0-n columns
@@ -99,7 +102,8 @@ add.score.matrix <- function(subject, score, garlic.matrix){
   #check if name exists as a colname, if so append to it
   if(subject %in% colnames(garlic.matrix)){
     c <- which(colnames(garlic.matrix) == subject)
-    garlic.matrix[nrow(garlic.matrix), c] <- score
+    r <- nrow(garlic.matrix)
+    garlic.matrix[r, c] <- score
   }
   #if not add it
   else{
