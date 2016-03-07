@@ -4,12 +4,15 @@ require(tree); (rpart); (randomForest)
 #'@param a tsv file with 30 siderophore and 30 decoy
 #'@return a table with prediction of siderophores from LOO analysis
 
-LOO_analysis <- function(LOO_sider){
-  LOO_tree <- tree_model(sider_training, sider_testing)
+LOO_analysis <- function(directory){
+  train.sider <- get.train.sider(directory)
+  test.sider <- get.test.sider(directory)
+  decoy <- get.decoy(directory)
+  LOO_tree <- tree_model(sider_train, sider_test)
   write.csv(LOO_tree, file = "~/git/R-script-for-learning/LOO_tree.csv")
-  LOO_rpart <- rpart_model(sider_training, sider_testing)
+  LOO_rpart <- rpart_model(sider_train, sider_test)
   write.csv(LOO_raprt, file = "~/git/R-script-for-learning/LOO_rpart.csv")
-  LOO_rf <- rf_model(sider_training, sider_testing)
+  LOO_rf <- rf_model(sider_train, sider_test)
   write.csv(LOO_rf, file = "~/git/R-script-for-learning/LOO_rf.csv")
 }
 
@@ -81,3 +84,33 @@ return(pred_rf)
 #write.csv(pred_rf, file = "") ## save your predicted probabilities ##
 
 #making a subtable for the training set and another subtable (1 row) for the testing cluster
+get.sider <- function(directory){
+  LOO_sider <- read.table(file = directory)
+  LOO_sider <- as.matrix(LOO_sider)[,-1]
+}
+
+get.decoy <- function(directory){
+  decoy <- read.table(file = "~/git/R-scripts-for-learning/cluster_breakdowns_decoy.tsv")
+  decoy <- as.matrix(decoy)[,-1]
+  return(decoy)
+}
+
+get.row.from.sider <- function(LOO_sider){
+  list.of.rows <- split(LOO_sider, row(LOO_sider))
+  return(list.of.rows)
+}
+
+get.test.sider <- function(list.of.rows)
+  for(i in 1: length(list.of.rows)){
+  test.sider <- matrix(list.of.rows[[i]], nrow = 1, byrow = FALSE)
+  colnames(test.sider) <- colnames(LOO_sider)
+  return(test.sider)
+  }
+
+get.train.sider <- function(test.sider, list.of.rows){
+  train.sider <- setdiff(list.of.rows, test.sider)
+  train.sider <- lapply(train.sider,  matrix(unlist(train.sider), ncol = 28, byrow = TRUE))
+  colnames(train.sider) <- colnames(LOO_sider)
+  train.sider <- rbind(train.sider, decoy)
+  return(train.sider)
+}
